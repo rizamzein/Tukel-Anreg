@@ -1,0 +1,207 @@
+---
+title: "Tugas Kelompok Analisis Regresi (Regresi Linear Sederhana)"
+author: "Kelompok 6"
+date: "2024-02-11"
+output: html_document
+---
+
+**Tugas Kelompok Analisis Regresi (Regresi Linear Sederhana)\
+Hubungan antara Jumlah *Profile Visits* dan Jumlah *Likes* pada Media Sosial *Instagram***
+
+**Kelompok 6 (P1)**
+
+1.  **Anindya Septyani G1401221074**
+2.  **Moch Rizam G1401221028**
+3.  **Rose Dwi Aulia Amaradhani G1401221002**
+
+# ***Input Data***
+
+```{r}
+library(readxl)
+data <- read_excel("C:/Users/Lenovo/Downloads/Instagram-data-fixed.xlsx")
+View(data)
+```
+
+# ***Menentukan X dan Y***
+
+```{r}
+y <- data$Likes
+x <- data$`Profile Visits`
+
+data <- data.frame(cbind(y,x))
+head(data)
+
+n <- nrow(data)
+n
+
+p <- ncol(data)
+p
+```
+
+# ***Analisis Data***
+
+```{r}
+y.bar <- mean(y)
+plot(x,y)
+```
+
+X : *Profile Visits*
+
+Y: Jumlah Suka (*Likes)*
+
+Berikut adalah *scatter plot* hasil sebaran data Instagram. Dapat terlihat dalam *scatter plot* tersebut bahwa *profile visits* berhubungan lineardengan jumlah suka (*likes*) sehingga data tersebut dapat dianalisis menggunakan analisis regresi linear sederhana.
+
+# ***Pembuatan Model***
+
+```{r}
+model <- lm(y~x, data)
+summary(model)
+```
+
+```{r}
+(anova.model <- anova(model))
+(KTG <- anova.model$`Mean Sq`[2])
+(galat.baku <- sqrt(KTG))
+```
+
+# ***Persamaan Regresi Linear Sederhana***
+
+```{r}
+(b1 <- model$coefficients[[2]])
+```
+
+```{r}
+(b0 <- model$coefficients[[1]])
+```
+
+Berikut merupakan persamaan dari regresi linear sederhana:
+
+$$
+\hat{Y}= 143.8008 + 0.5922492 X_1
+$$
+
+# ***Korelasi dan Koefisien Determinasi***
+
+```{r}
+r<-(sum(x*y)-sum(x)*sum(y)/119)/
+  sqrt((sum(x^2)-(sum(x)^2/119))*(sum(y^2)-(sum(y)^2/119)))
+r
+Koef_det<-r^2
+Koef_det
+```
+
+Kasus ini memiliki korelasi sebesar 0.626107 yang memiliki makna jumlah *Profile Visits* dan jumlah suka (*likes*) memiliki hubungan positif yang cukup besar, dengan koefisien keragaman sebesar 0.39201 yang menjelaskan keragaman pada jumlah *Profile Visits* sebesar 39.201%.
+
+# ***Uji Hipotesis***
+
+```{r}
+ttabel <- qt(0.025, df= 117, lower.tail = FALSE)
+ttabel
+```
+
+Dengan nilai intersep sebesar 143,8008, akan diuji apakah ada jumlah *likes* yang tidak dapat dijelaskan oleh banyaknya jumlah *profile visits* atau tidak.
+
+**Hipotesis Uji:**
+
+𝐻0: 𝛽0 = 0 (Jumlah *likes* dapat dijelaskan oleh banyaknya *profile visits*)
+
+𝐻1: 𝛽0 ≠ 0 (Ada jumlah *likes* yang tidak dapat dijelaskan oleh banyaknya banyaknya *profile visits*)
+
+```{r}
+(b0 <- model$coefficients[[1]])
+(se_b0 <- sqrt(KTG*(1/n+mean(x)^2/sum((x-mean(x))^2))))
+(t_b0 <- b0/se_b0)
+```
+
+**Kaidah Keputusan:**
+
+Dapat dilihat bahwa t-hitung sebesar 21,0015 dan t-tabel sebesar 1,980448. Oleh Karena itu, t-hitung \> t-tabel maka tolak H0 yang berarti terdapat cukup bukti untuk menyatakan bahwa ada jumlah *likes* yang tidak dapat dijelaskan oleh banyaknya jumlah *profile visits* pada taraf nyata 5%.
+
+Dengan nilai slope sebesar 0,5922492, selanjutnya akan diuji apakah *profile visits* (x) memengaruhi jumlah *likes* (y) atau tidak.
+
+**Hipotesis Uji:**
+
+𝐻0: 𝛽1 = 0 (Tidak ada hubungan linier antara jumlah *profile visits* dan jumlah *likes*)
+
+𝐻1: 𝛽1 ≠ 0 (Ada hubungan linier antara jumlah *profile visits* dan jumlah *likes*)
+
+```{r}
+(b1 <- model$coefficients[[2]])
+(se_b1 <- sqrt(KTG/sum((x-mean(x))^2)))
+(t_b1 <- b1/se_b1)
+```
+
+**Kaidah Keputusan:**
+
+Dapat dilihat bahwa t-hitung sebesar 8,68547 dan t-tabel sebesar 1,980448. Oleh Karena itu, t-hitung \> t-tabel maka tolak H0 yang berarti antara jumlah *profile visits* dan jumlah *likes* terdapat hubungan linear serta cukup bukti untuk menyatakan bahwa banyaknya jumlah *profile visits* memengaruhi jumlah *likes* pada taraf nyata 5%.
+
+# ***Penguraian Keragaman***
+
+```{r}
+JKG <- sum((y-(b0+b1*x))^2)
+JKG
+```
+
+```{r}
+JKReg <- sum(((b0+b1*x)- mean(y))^2)
+JKReg
+```
+
+```{r}
+JKT <- sum((y - mean(y))^2)
+JKT
+```
+
+```{r}
+JKT2 <- JKReg+JKG
+JKT2
+```
+
+```{r}
+dbReg <- 1
+dbReg
+dbg <- n-2
+dbg
+dbt <- n-1
+dbt
+```
+
+```{r}
+Fhit <- (JKReg/dbReg)/(JKG/dbg)
+Fhit
+```
+
+```{r}
+P.value <- 1-pf(Fhit,dbReg,dbg,lower.tail<-F)
+P.value
+```
+
+# ***Selang Kepercayaan Parameter***
+
+```{r}
+#Batas bawah b0
+(bb.b0 <- b0 - abs(qt(0.025, df=117))*se_b0)
+
+#Batas atas b0
+(bb.b0 <- b0 + abs(qt(0.025, df=117))*se_b0)
+```
+
+Pada taraf nyata sebesar 5%, dapat diyakini bahwa nilai parameter b0 berada dalam selang 130,2403 hingga 157,3612.
+
+$$
+\ 130.2403 < b0 < 157.3612
+$$
+
+```{r}
+#Batas Bawah b1
+(bb.b1 <- b1 - abs(qt(0.025, df=117))*se_b1)
+
+#Batas Atas b1
+(ba.b1 <- b1 + abs(qt(0.025, df=117))*se_b1)
+```
+
+Pada taraf nyata sebesar 5% dapat diyakini bahwa nilai parameter b1 berada dalam selang 0,4572055 hingga 0,72793.
+
+$$
+\ 0.4572055 < b1 < 0.727293
+$$
